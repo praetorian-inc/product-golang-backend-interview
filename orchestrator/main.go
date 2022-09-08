@@ -34,21 +34,39 @@ func main() {
 	}
 	defer p.Close()
 
-	db, err := sql.Open("mysql", "root:root@tcp(127.0.0.1:3306)/scanner")
+	db, err := sql.Open("mysql", "root:root@tcp(127.0.0.1:3307)/scanner")
 	if err != nil {
 		panic(err)
 	}
 
 	defer db.Close()
 
-	db.Exec("DROP TABLE IF EXISTS `root_domain`;")
-	db.Exec("CREATE TABLE `root_domain` (`id` int(8) unsigned NOT NULL, root varchar(32) NOT NULL, status varchar(32), owner varchar(32), PRIMARY KEY (`id`));")
+	_, err = db.Exec("DROP TABLE IF EXISTS `root_domain`;")
+	if err != nil {
+		fmt.Println(err.Error())
+		return
+	}
+	_, err = db.Exec("CREATE TABLE `root_domain` (`id` int(8) unsigned NOT NULL, root varchar(32) NOT NULL, status varchar(32), owner varchar(32), PRIMARY KEY (`id`));")
+	if err != nil {
+		fmt.Println(err.Error())
+		return
+	}
 
-	db.Exec("DROP TABLE IF EXISTS `subdomain`;")
-	db.Exec("CREATE TABLE `subdomain` (`id` int(8) unsigned NOT NULL, root varchar(32) NOT NULL, source varchar(32), PRIMARY KEY (`id`));")
+	_, err = db.Exec("DROP TABLE IF EXISTS `subdomain`;")
+	if err != nil {
+		fmt.Println(err.Error())
+		return
+	}
+
+	_, err = db.Exec("CREATE TABLE `subdomain` (`id` int(8) unsigned NOT NULL, root varchar(32) NOT NULL, source varchar(32), PRIMARY KEY (`id`));")
+	if err != nil {
+		fmt.Println(err.Error())
+		return
+	}
 
 	s := handlers.Server{
-		Producer: p,
+		Producer:  p,
+		SqlClient: handlers.SqlClient{DB: db},
 	}
 
 	// Consume kafka events asynchronously
@@ -56,7 +74,7 @@ func main() {
 
 	mux := http.NewServeMux()
 	mux.HandleFunc("/api/v1/ingest", s.IngestHandler)
-	mux.HandleFunc("/api/v1/domain", s.IngestHandler)
+	mux.HandleFunc("/api/v1/domain", s.GetDomainsHandler)
 	mux.HandleFunc("/api/v1/subdomain", s.IngestHandler)
 
 	fmt.Println("Listening on localhost:" + strconv.Itoa(*port))

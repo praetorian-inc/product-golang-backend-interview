@@ -6,6 +6,10 @@ import (
 )
 
 type Server struct {
-	Producer *kafka.Producer
-	DB       *sql.DB
+	Producer  *kafka.Producer
+	SqlClient SqlClient
+}
+
+type SqlClient struct {
+	DB *sql.DB
 }

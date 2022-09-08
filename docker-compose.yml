@@ -25,10 +25,16 @@ services:
       KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
       KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
   db:
-    image: mysql
+    image: mysql:8.0
     restart: always
     environment:
-      MYSQL_ROOT_PASSWORD: root
       MYSQL_DATABASE: scanner
+      MYSQL_ROOT_PASSWORD: root
     ports:
-      - "3306:3306"
+      - '3307:3306'
+    volumes:
+      - db:/var/lib/mysql
+      - .docker/setup.sql:/docker-entrypoint-initdb.d/init.sql
+volumes:
+  db:
+    driver: local

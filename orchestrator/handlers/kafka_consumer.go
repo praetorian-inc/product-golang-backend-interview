@@ -56,6 +56,10 @@ func (s *Server) DomainEventHandler(m dto.KafkaMessage) error {
 
 	fmt.Printf("Received DomainDto: %v\n", domainDto)
 
+	s.SqlClient.SaveDomain(domainDto)
+
+	fmt.Println("Inserted domain")
+
 	return nil
 }
 
