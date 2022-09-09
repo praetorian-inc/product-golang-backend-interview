@@ -1,5 +1,9 @@
 # product-golang-backend-interview
 
+This interview station involves a small microservice architecture that scans root domains for subdomains and persists that information in a SQL database.
+
+![Microservice Documentation](microservice_documentation.png "Microservice Documentation")
+
 ### To run:
 ```$ docker-compose up -d```
 
