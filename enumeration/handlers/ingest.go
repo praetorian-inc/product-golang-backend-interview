@@ -12,32 +12,40 @@ func (s *Server) IngestHandler(m dto.KafkaMessage) error {
 		return err
 	}
 
-	domainDto := dto.DomainDto{
-		Id:     ingestDto.Id,
-		Root:   ingestDto.Domain,
-		Status: "SCANNING",
-		Owner:  "",
-	}
-
-	domainMarshal, err := marshalDomainDtoHelper(domainDto)
+	subdomains, err := enumerateSubdomains(ingestDto.Domain)
 	if err != nil {
 		return err
 	}
 
-	domainEvent := dto.KafkaMessage{
-		Type:    "domainEvent",
-		Payload: domainMarshal,
-	}
+	for _, subdomain := range subdomains {
+		domainDto := dto.DomainDto{
+			Id:     ingestDto.Id,
+			Root:   ingestDto.Domain,
+			Domain:	subdomain,
+			Status: "SCANNED",
+			Owner:  "",
+		}
 
-	domainEventMessage, err := json.Marshal(domainEvent)
-	if err != nil {
-		return err
-	}
+		domainMarshal, err := marshalDomainDtoHelper(domainDto)
+		if err != nil {
+			return err
+		}
 
-	fmt.Printf("Producing message: %s\n", string(domainEventMessage))
-	err = s.Produce("domainEvent", domainEventMessage)
-	if err != nil {
-		return err
+		domainEvent := dto.KafkaMessage{
+			Type:    "domainEvent",
+			Payload: domainMarshal,
+		}
+
+		domainEventMessage, err := json.Marshal(domainEvent)
+		if err != nil {
+			return err
+		}
+
+		fmt.Printf("Producing message: %s\n", string(domainEventMessage))
+		err = s.Produce("domainEvent", domainEventMessage)
+		if err != nil {
+			return err
+		}
 	}
 
 	return nil
