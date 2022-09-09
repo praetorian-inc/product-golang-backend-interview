@@ -10,6 +10,7 @@ import (
 
 func (s *Server) PollKafkaEvents(consumer *kafka.Consumer) {
 	run := true
+	fmt.Printf("Consuming kafka events from port 9092")
 	for run == true {
 		ev := consumer.Poll(0)
 		switch e := ev.(type) {
