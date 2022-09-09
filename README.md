@@ -4,27 +4,24 @@ This interview station involves a small microservice architecture that scans roo
 
 ![Microservice Documentation](microservice_documentation.png "Microservice Documentation")
 
-### To run:
+## Component Breakdown
+
+There are four components in this project:
+ - Orchestrator (`orchestrator/`)
+   - API server that serves for requests to scan a domain and view information about previously scanned domains and their subdomains
+ - Enumeration (`enumeration/`)
+   - Ingests a domain, iterates over its subdomains, and publishes individual events for the subdomains
+ - MySQL (`docker-compose.yaml`)
+   - Consists of a `scanner` database accessible to the root user
+ - Kafka (`docker-compose.yaml`)
+    - Consists of a zookeeper and a single broker
+
+### Usage:
+To run the Kafka and MySQL containers, spin them up with docker-compose:
+
 ```$ docker-compose up -d```
 
-Don't forget to create the kafka topic:
+Don't forget to create the kafka topics:
 ```
-docker exec broker \
-kafka-topics --bootstrap-server broker:9092 \
-             --create \
-             --topic ingest
-```
-
-```
-docker exec broker \
-kafka-topics --bootstrap-server broker:9092 \
-             --create \
-             --topic domainEvent
-```
-
-```
-docker exec broker \
-kafka-topics --bootstrap-server broker:9092 \
-             --create \
-             --topic subdomainEvent
+./create-topics.sh
 ```
