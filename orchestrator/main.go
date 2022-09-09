@@ -15,57 +15,29 @@ import (
 func main() {
 	port := flag.Int("listenPort", 9000, "Port on which to serve HTTP requests")
 
-	consumer, err := kafka.NewConsumer(&kafka.ConfigMap{
-		"bootstrap.servers": "localhost:9092",
-		"group.id":          "orchestrator",
-		"auto.offset.reset": "smallest"})
+	consumer, err := setupKafkaConsumer()
 	if err != nil {
-		panic(err)
-	}
-	err = consumer.SubscribeTopics([]string{"domainEvent", "subdomainEvent"}, nil)
-	if err != nil {
-		panic(err)
+		fmt.Printf("Error while setting up Kafka consumer: %s\n", err.Error())
+		return
 	}
 
-	p, err := kafka.NewProducer(&kafka.ConfigMap{
-		"bootstrap.servers": "localhost"})
+	producer, err := setupKafkaProducer()
 	if err != nil {
-		panic(err)
+		fmt.Printf("Error while setting up Kafka producer: %s\n", err.Error())
+		return
 	}
-	defer p.Close()
+	defer producer.Close()
 
-	db, err := sql.Open("mysql", "root:root@tcp(127.0.0.1:3307)/scanner")
+	db, err := getDbConnection()
 	if err != nil {
-		panic(err)
+		fmt.Printf("Error while getting MySQL connection: %s\n", err.Error())
+		return
 	}
 
 	defer db.Close()
 
-	_, err = db.Exec("DROP TABLE IF EXISTS `root_domain`;")
-	if err != nil {
-		fmt.Println(err.Error())
-		return
-	}
-	_, err = db.Exec("CREATE TABLE `root_domain` (`id` int(8) unsigned NOT NULL, root varchar(32) NOT NULL, status varchar(32), owner varchar(32), PRIMARY KEY (`id`));")
-	if err != nil {
-		fmt.Println(err.Error())
-		return
-	}
-
-	_, err = db.Exec("DROP TABLE IF EXISTS `subdomain`;")
-	if err != nil {
-		fmt.Println(err.Error())
-		return
-	}
-
-	_, err = db.Exec("CREATE TABLE `subdomain` (`id` int(8) unsigned NOT NULL, root varchar(32) NOT NULL, source varchar(32), PRIMARY KEY (`id`));")
-	if err != nil {
-		fmt.Println(err.Error())
-		return
-	}
-
 	s := handlers.Server{
-		Producer:  p,
+		Producer:  producer,
 		SqlClient: handlers.SqlClient{DB: db},
 	}
 
@@ -83,4 +55,53 @@ func main() {
 		fmt.Println(err)
 		panic(err)
 	}
+}
+
+func setupKafkaConsumer() (*kafka.Consumer, error) {
+	consumer, err := kafka.NewConsumer(&kafka.ConfigMap{
+		"bootstrap.servers": "localhost:9092",
+		"group.id":          "orchestrator",
+		"auto.offset.reset": "smallest"})
+	if err != nil {
+		return nil, err
+	}
+	err = consumer.SubscribeTopics([]string{"domainEvent", "subdomainEvent"}, nil)
+
+	return consumer, err
+}
+
+func setupKafkaProducer() (*kafka.Producer, error) {
+	return kafka.NewProducer(&kafka.ConfigMap{"bootstrap.servers": "localhost"}) // Default port is 9092
+}
+
+func getDbConnection() (*sql.DB, error) {
+	db, err := sql.Open("mysql", "root:root@tcp(127.0.0.1:3307)/scanner")
+	if err != nil {
+		return nil, err
+	}
+
+	_, err = db.Exec("DROP TABLE IF EXISTS `root_domain`;")
+	if err != nil {
+		fmt.Println(err.Error())
+		return nil, err
+	}
+	_, err = db.Exec("CREATE TABLE `root_domain` (`id` int(8) unsigned NOT NULL, root varchar(32) NOT NULL, status varchar(32), owner varchar(32), PRIMARY KEY (`id`));")
+	if err != nil {
+		fmt.Println(err.Error())
+		return nil, err
+	}
+
+	_, err = db.Exec("DROP TABLE IF EXISTS `subdomain`;")
+	if err != nil {
+		fmt.Println(err.Error())
+		return nil, err
+	}
+
+	_, err = db.Exec("CREATE TABLE `subdomain` (`id` int(8) unsigned NOT NULL, root varchar(32) NOT NULL, source varchar(32), PRIMARY KEY (`id`));")
+	if err != nil {
+		fmt.Println(err.Error())
+		return nil, err
+	}
+
+	return db, nil
 }
