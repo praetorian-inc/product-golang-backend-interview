@@ -40,7 +40,7 @@ func (s *Server) IngestHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Save the domain so we can track scanning progress
-	err = s.SqlClient.SaveDomain(dto.DomainDto{
+	err = s.SqlClient.SaveDomain(dto.RootDomainDto{
 		Id:   ingestDto.Id,
 		Root: ingestDto.Domain,
 	})

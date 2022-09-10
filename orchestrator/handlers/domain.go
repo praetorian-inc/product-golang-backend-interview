@@ -35,22 +35,22 @@ func (s *Server) GetDomainsHandler(w http.ResponseWriter, r *http.Request) {
 
 }
 
-func (sqlClient SqlClient) GetAllDomains() ([]dto.DomainDto, error) {
+func (sqlClient SqlClient) GetAllDomains() ([]dto.RootDomainDto, error) {
 	query := fmt.Sprintf("SELECT * FROM root_domain;")
 	rows, err := sqlClient.DB.Query(query)
 	if err != nil {
-		return []dto.DomainDto{}, err
+		return []dto.RootDomainDto{}, err
 	}
 
 	defer rows.Close()
 
-	var domains []dto.DomainDto
+	var domains []dto.RootDomainDto
 	for rows.Next() {
-		var domain dto.DomainDto
+		var domain dto.RootDomainDto
 
 		err := rows.Scan(&domain.Id, &domain.Root, &domain.Status, &domain.Owner)
 		if err != nil {
-			return []dto.DomainDto{}, err
+			return []dto.RootDomainDto{}, err
 		}
 
 		domains = append(domains, domain)
@@ -59,7 +59,7 @@ func (sqlClient SqlClient) GetAllDomains() ([]dto.DomainDto, error) {
 	return domains, nil
 }
 
-func (sqlClient SqlClient) SaveDomain(domain dto.DomainDto) error {
+func (sqlClient SqlClient) SaveDomain(domain dto.RootDomainDto) error {
 	query := fmt.Sprintf("INSERT INTO root_domain (id, root, status, owner) VALUES(%d, '%s', '%s', '%s');", domain.Id, domain.Root, domain.Status, domain.Owner)
 	_, err := sqlClient.DB.Exec(query)
 	return err

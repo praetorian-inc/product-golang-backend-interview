@@ -61,7 +61,7 @@ func (s *Server) DomainEventHandler(m dto.KafkaMessage) error {
 		return err
 	}
 
-	fmt.Printf("Received DomainDto: %v\n", domainDto)
+	fmt.Printf("Received RootDomainDto: %v\n", domainDto)
 
 	err = s.SqlClient.SaveDomain(domainDto)
 	if err != nil {
@@ -91,16 +91,16 @@ func (s *Server) SubdomainEventHandler(m dto.KafkaMessage) error {
 	return nil
 }
 
-func unmarshalDomainDtoHelper(raw map[string]interface{}) (dto.DomainDto, error) {
+func unmarshalDomainDtoHelper(raw map[string]interface{}) (dto.RootDomainDto, error) {
 	rawJson, err := json.Marshal(raw)
 	if err != nil {
-		return dto.DomainDto{}, err
+		return dto.RootDomainDto{}, err
 	}
 
 	// Convert json string to struct
-	var domainDto dto.DomainDto
+	var domainDto dto.RootDomainDto
 	if err := json.Unmarshal(rawJson, &domainDto); err != nil {
-		return dto.DomainDto{}, err
+		return dto.RootDomainDto{}, err
 	}
 
 	return domainDto, nil
