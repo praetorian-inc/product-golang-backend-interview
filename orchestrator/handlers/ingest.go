@@ -45,6 +45,7 @@ func (s *Server) IngestHandler(w http.ResponseWriter, r *http.Request) {
 		Root: ingestDto.Domain,
 	})
 	if err != nil {
+		fmt.Printf("Error while saving domain: %s\n", err.Error())
 		w.WriteHeader(500) // INTERNAL_SERVER_ERROR
 		return
 	}
@@ -52,6 +53,7 @@ func (s *Server) IngestHandler(w http.ResponseWriter, r *http.Request) {
 	// Marshall into a send-able message
 	ingestMarshal, err := marshalPayloadHelper(ingestDto)
 	if err != nil {
+		fmt.Printf("Error while marshalling payload: %s\n", err.Error())
 		w.WriteHeader(500) // INTERNAL_SERVER_ERROR
 		return
 	}
@@ -62,6 +64,7 @@ func (s *Server) IngestHandler(w http.ResponseWriter, r *http.Request) {
 
 	messageBytes, err := json.Marshal(ingestMessage)
 	if err != nil {
+		fmt.Printf("Error while marshalling injest message: %s\n", err.Error())
 		w.WriteHeader(500) // INTERNAL_SERVER_ERROR
 		return
 	}
@@ -70,6 +73,7 @@ func (s *Server) IngestHandler(w http.ResponseWriter, r *http.Request) {
 
 	err = s.Produce(topic, messageBytes)
 	if err != nil {
+		fmt.Printf("Error while producing ingest message: %s\n", err.Error())
 		w.WriteHeader(500) // INTERNAL_SERVER_ERROR
 		return
 	}
