@@ -35,6 +35,39 @@ func (s *Server) GetDomainsHandler(w http.ResponseWriter, r *http.Request) {
 
 }
 
+func (s *Server) DomainEventHandler(m dto.KafkaMessage) error {
+	domainDto, err := unmarshalDomainDtoHelper(m.Payload)
+	if err != nil {
+		return err
+	}
+
+	fmt.Printf("Received RootDomainDto: %v\n", domainDto)
+
+	err = s.SqlClient.SaveDomain(domainDto)
+	if err != nil {
+		return err
+	}
+
+	fmt.Println("Inserted domain")
+
+	return nil
+}
+
+func unmarshalDomainDtoHelper(raw map[string]interface{}) (dto.RootDomainDto, error) {
+	rawJson, err := json.Marshal(raw)
+	if err != nil {
+		return dto.RootDomainDto{}, err
+	}
+
+	// Convert json string to struct
+	var domainDto dto.RootDomainDto
+	if err := json.Unmarshal(rawJson, &domainDto); err != nil {
+		return dto.RootDomainDto{}, err
+	}
+
+	return domainDto, nil
+}
+
 func (sqlClient SqlClient) GetAllDomains() ([]dto.RootDomainDto, error) {
 	query := fmt.Sprintf("SELECT * FROM root_domain;")
 	rows, err := sqlClient.DB.Query(query)

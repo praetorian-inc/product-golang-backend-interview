@@ -58,6 +58,39 @@ func (s *Server) GetSubdomainsHandler(w http.ResponseWriter, r *http.Request) {
 
 }
 
+func (s *Server) SubdomainEventHandler(m dto.KafkaMessage) error {
+	subdomainDto, err := unmarshalSubdomainDtoHelper(m.Payload)
+	if err != nil {
+		return err
+	}
+
+	fmt.Printf("Received SubdomainDto: %v\n", subdomainDto)
+
+	err = s.SqlClient.SaveSubdomain(subdomainDto)
+	if err != nil {
+		return err
+	}
+
+	fmt.Println("Inserted subdomain")
+
+	return nil
+}
+
+func unmarshalSubdomainDtoHelper(raw map[string]interface{}) (dto.SubdomainDto, error) {
+	rawJson, err := json.Marshal(raw)
+	if err != nil {
+		return dto.SubdomainDto{}, err
+	}
+
+	// Convert json string to struct
+	var subdomainDto dto.SubdomainDto
+	if err := json.Unmarshal(rawJson, &subdomainDto); err != nil {
+		return dto.SubdomainDto{}, err
+	}
+
+	return subdomainDto, nil
+}
+
 func (sqlClient SqlClient) GetSubdomains(page uint, limit uint) ([]dto.SubdomainDto, error) {
 	query := fmt.Sprintf("SELECT * FROM subdomain LIMIT %d, %d;", (page-1)*limit, limit)
 	fmt.Printf("query: %s", query)
