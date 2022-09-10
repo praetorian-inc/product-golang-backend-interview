@@ -32,6 +32,12 @@ func (s *Server) PollKafkaEvents() {
 					fmt.Printf("Could not ingest domain due to error %s\n", err)
 					continue
 				}
+			case "subdomainEvent":
+				err := s.SubdomainEventHandler(message)
+				if err != nil {
+					fmt.Printf("Could not ingest subdomain due to error %s\n", err)
+					continue
+				}
 			default:
 				fmt.Printf("Unexpected message type: %s\n", message.Type)
 				continue
@@ -57,9 +63,30 @@ func (s *Server) DomainEventHandler(m dto.KafkaMessage) error {
 
 	fmt.Printf("Received DomainDto: %v\n", domainDto)
 
-	s.SqlClient.SaveDomain(domainDto)
+	err = s.SqlClient.SaveDomain(domainDto)
+	if err != nil {
+		return err
+	}
 
 	fmt.Println("Inserted domain")
+
+	return nil
+}
+
+func (s *Server) SubdomainEventHandler(m dto.KafkaMessage) error {
+	subdomainDto, err := unmarshalSubdomainDtoHelper(m.Payload)
+	if err != nil {
+		return err
+	}
+
+	fmt.Printf("Received SubdomainDto: %v\n", subdomainDto)
+
+	err = s.SqlClient.SaveSubdomain(subdomainDto)
+	if err != nil {
+		return err
+	}
+
+	fmt.Println("Inserted subdomain")
 
 	return nil
 }
@@ -77,4 +104,19 @@ func unmarshalDomainDtoHelper(raw map[string]interface{}) (dto.DomainDto, error)
 	}
 
 	return domainDto, nil
+}
+
+func unmarshalSubdomainDtoHelper(raw map[string]interface{}) (dto.SubdomainDto, error) {
+	rawJson, err := json.Marshal(raw)
+	if err != nil {
+		return dto.SubdomainDto{}, err
+	}
+
+	// Convert json string to struct
+	var subdomainDto dto.SubdomainDto
+	if err := json.Unmarshal(rawJson, &subdomainDto); err != nil {
+		return dto.SubdomainDto{}, err
+	}
+
+	return subdomainDto, nil
 }

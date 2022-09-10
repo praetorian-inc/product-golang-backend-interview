@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"enumeration/dto"
 	"fmt"
+	"math/rand"
 )
 
 func (s *Server) IngestHandler(m dto.KafkaMessage) error {
@@ -18,31 +19,30 @@ func (s *Server) IngestHandler(m dto.KafkaMessage) error {
 	}
 
 	for _, subdomain := range subdomains {
-		domainDto := dto.DomainDto{
-			Id:     ingestDto.Id,
+
+		subdomainDto := dto.SubdomainDto{
+			Id:     rand.Uint32(),
 			Root:   ingestDto.Domain,
-			Domain: subdomain,
-			Status: "SCANNED",
-			Owner:  "",
+			Source: subdomain,
 		}
 
-		domainMarshal, err := marshalPayloadHelper(domainDto)
+		subdomainMarshal, err := marshalPayloadHelper(subdomainDto)
 		if err != nil {
 			return err
 		}
 
-		domainEvent := dto.KafkaMessage{
-			Type:    "domainEvent",
-			Payload: domainMarshal,
+		subdomainEvent := dto.KafkaMessage{
+			Type:    "subdomainEvent",
+			Payload: subdomainMarshal,
 		}
 
-		domainEventMessage, err := json.Marshal(domainEvent)
+		subdomainEventMessage, err := json.Marshal(subdomainEvent)
 		if err != nil {
 			return err
 		}
 
-		fmt.Printf("Producing message: %s\n", string(domainEventMessage))
-		err = s.Produce("domainEvent", domainEventMessage)
+		fmt.Printf("Producing message: %s\n", string(subdomainEventMessage))
+		err = s.Produce("subdomainEvent", subdomainEventMessage)
 		if err != nil {
 			return err
 		}

@@ -4,6 +4,12 @@ This interview station involves a small microservice architecture that scans roo
 
 ![Microservice Documentation](microservice_documentation.png "Microservice Documentation")
 
+## Dependencies
+
+In order to run the Kafka zookeeper, Kafka broker, and MySQL server, you'll need to install [docker-compose](https://docs.docker.com/compose/install/).
+
+In order to compile the two microservices, you'll need [Go 1.17](https://go.dev/doc/install) or newer.
+
 ## Component Breakdown
 
 There are four components in this project:
@@ -24,4 +30,14 @@ To run the Kafka and MySQL containers, spin them up with docker-compose:
 Don't forget to create the kafka topics:
 ```
 ./create-topics.sh
+```
+
+To run the orchestrator and enumeration services, `cd` into the respective directory and run 
+```
+./run.sh
+```
+
+Once both services are running, start a subdomain by calling the orchestrator's ingest endpoint:
+```
+curl -v -X POST localhost:9000/api/v1/ingest -H "Content-type: application/json" -d '{"Domain": "praetorian.com"}'
 ```

@@ -50,7 +50,7 @@ func main() {
 	mux := http.NewServeMux()
 	mux.HandleFunc("/api/v1/ingest", s.IngestHandler)
 	mux.HandleFunc("/api/v1/domain", s.GetDomainsHandler)
-	mux.HandleFunc("/api/v1/subdomain", s.IngestHandler)
+	mux.HandleFunc("/api/v1/subdomain", s.GetSubdomainsHandler)
 
 	fmt.Println("Listening on localhost:" + strconv.Itoa(*port))
 	err = http.ListenAndServe("localhost:"+strconv.Itoa(*port), mux)
@@ -100,7 +100,7 @@ func getDbConnection() (*sql.DB, error) {
 		return nil, err
 	}
 
-	_, err = db.Exec("CREATE TABLE `subdomain` (`id` int(8) unsigned NOT NULL, root varchar(32) NOT NULL, source varchar(32), PRIMARY KEY (`id`));")
+	_, err = db.Exec("CREATE TABLE `subdomain` (`id` int(8) unsigned NOT NULL, root varchar(32) NOT NULL, source varchar(256), PRIMARY KEY (`id`));")
 	if err != nil {
 		fmt.Println(err.Error())
 		return nil, err

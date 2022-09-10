@@ -39,12 +39,22 @@ func (s *Server) IngestHandler(w http.ResponseWriter, r *http.Request) {
 		ingestDto.Id = rand.Uint32()
 	}
 
-	ingestMarshal, err := marshalIngestDtoHelper(ingestDto)
+	// Save the domain so we can track scanning progress
+	err = s.SqlClient.SaveDomain(dto.DomainDto{
+		Id:   ingestDto.Id,
+		Root: ingestDto.Domain,
+	})
 	if err != nil {
 		w.WriteHeader(500) // INTERNAL_SERVER_ERROR
 		return
 	}
 
+	// Marshall into a send-able message
+	ingestMarshal, err := marshalPayloadHelper(ingestDto)
+	if err != nil {
+		w.WriteHeader(500) // INTERNAL_SERVER_ERROR
+		return
+	}
 	ingestMessage := dto.KafkaMessage{
 		Type:    "ingestDomain",
 		Payload: ingestMarshal,
@@ -65,16 +75,16 @@ func (s *Server) IngestHandler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func marshalIngestDtoHelper(ingestDto dto.IngestDto) (map[string]interface{}, error) {
-	ingestJson, err := json.Marshal(ingestDto)
+func marshalPayloadHelper(payload interface{}) (map[string]interface{}, error) {
+	payloadJson, err := json.Marshal(payload)
 	if err != nil {
 		return map[string]interface{}{}, err
 	}
 
-	var ingestMarshal map[string]interface{}
-	if err := json.Unmarshal(ingestJson, &ingestMarshal); err != nil {
+	var payloadMarshal map[string]interface{}
+	if err := json.Unmarshal(payloadJson, &payloadMarshal); err != nil {
 		return map[string]interface{}{}, err
 	}
 
-	return ingestMarshal, nil
+	return payloadMarshal, nil
 }
