@@ -22,7 +22,7 @@ There are four components in this project:
  - Kafka (`docker-compose.yaml`)
     - Consists of a zookeeper and a single broker
 
-### Usage:
+### Usage
 To run the Kafka and MySQL containers, spin them up with docker-compose:
 
 ```$ docker-compose up -d```
@@ -40,4 +40,21 @@ To run the orchestrator and enumeration services, `cd` into the respective direc
 Once both services are running, start a subdomain by calling the orchestrator's ingest endpoint:
 ```
 curl -v -X POST localhost:9000/api/v1/ingest -H "Content-type: application/json" -d '{"Domain": "praetorian.com"}'
+```
+
+### API
+
+These are the endpoints that the orchestrator supports:
+```
+POST /api/v1/ingest
+  example body: { "Domain": "praetorian.com" }
+  
+  Initiates a scan of the provided domain.
+
+GET  /api/v1/domain
+  Returns all domains that have been scanned since startup
+
+GET  /api/v1/subdomain?page=<uint32>&offset=<uint32>
+  Returns a list of subdomains filtered by query parameters.
+
 ```
