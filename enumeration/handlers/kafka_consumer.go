@@ -2,9 +2,9 @@ package handlers
 
 import (
 	"encoding/json"
+	"enumeration/dto"
 	"fmt"
 	"github.com/confluentinc/confluent-kafka-go/kafka"
-	"orchestrator/dto"
 	"os"
 )
 
@@ -26,8 +26,8 @@ func (s *Server) PollKafkaEvents() {
 			}
 
 			switch message.Type {
-			case "domainEvent":
-				err := s.DomainEventHandler(message)
+			case "ingestDomain":
+				err := s.IngestHandler(message)
 				if err != nil {
 					fmt.Printf("Could not ingest domain due to error %s\n", err)
 					continue
@@ -47,34 +47,4 @@ func (s *Server) PollKafkaEvents() {
 	}
 
 	fmt.Printf("Kafka Consumer exited.")
-}
-
-func (s *Server) DomainEventHandler(m dto.KafkaMessage) error {
-	domainDto, err := unmarshalDomainDtoHelper(m.Payload)
-	if err != nil {
-		return err
-	}
-
-	fmt.Printf("Received DomainDto: %v\n", domainDto)
-
-	s.SqlClient.SaveDomain(domainDto)
-
-	fmt.Println("Inserted domain")
-
-	return nil
-}
-
-func unmarshalDomainDtoHelper(raw map[string]interface{}) (dto.DomainDto, error) {
-	rawJson, err := json.Marshal(raw)
-	if err != nil {
-		return dto.DomainDto{}, err
-	}
-
-	// Convert json string to struct
-	var domainDto dto.DomainDto
-	if err := json.Unmarshal(rawJson, &domainDto); err != nil {
-		return dto.DomainDto{}, err
-	}
-
-	return domainDto, nil
 }

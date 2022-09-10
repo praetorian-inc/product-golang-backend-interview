@@ -21,12 +21,12 @@ func (s *Server) IngestHandler(m dto.KafkaMessage) error {
 		domainDto := dto.DomainDto{
 			Id:     ingestDto.Id,
 			Root:   ingestDto.Domain,
-			Domain:	subdomain,
+			Domain: subdomain,
 			Status: "SCANNED",
 			Owner:  "",
 		}
 
-		domainMarshal, err := marshalDomainDtoHelper(domainDto)
+		domainMarshal, err := marshalPayloadHelper(domainDto)
 		if err != nil {
 			return err
 		}
@@ -66,16 +66,16 @@ func unmarshalIngestDtoHelper(raw map[string]interface{}) (dto.IngestDto, error)
 	return ingestDto, nil
 }
 
-func marshalDomainDtoHelper(domainDto dto.DomainDto) (map[string]interface{}, error) {
-	rawJson, err := json.Marshal(domainDto)
+func marshalPayloadHelper(payload interface{}) (map[string]interface{}, error) {
+	payloadJson, err := json.Marshal(payload)
 	if err != nil {
 		return map[string]interface{}{}, err
 	}
 
-	var domainMarshal map[string]interface{}
-	if err := json.Unmarshal(rawJson, &domainMarshal); err != nil {
+	var payloadMarshal map[string]interface{}
+	if err := json.Unmarshal(payloadJson, &payloadMarshal); err != nil {
 		return map[string]interface{}{}, err
 	}
 
-	return domainMarshal, nil
+	return payloadMarshal, nil
 }

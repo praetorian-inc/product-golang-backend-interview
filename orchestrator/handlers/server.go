@@ -7,6 +7,7 @@ import (
 
 type Server struct {
 	Producer  *kafka.Producer
+	Consumer  *kafka.Consumer
 	SqlClient SqlClient
 }
 

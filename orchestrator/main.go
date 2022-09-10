@@ -15,12 +15,14 @@ import (
 func main() {
 	port := flag.Int("listenPort", 9000, "Port on which to serve HTTP requests")
 
+	// Setup Kafka consumer
 	consumer, err := setupKafkaConsumer()
 	if err != nil {
 		fmt.Printf("Error while setting up Kafka consumer: %s\n", err.Error())
 		return
 	}
 
+	// Setup Kafka producer
 	producer, err := setupKafkaProducer()
 	if err != nil {
 		fmt.Printf("Error while setting up Kafka producer: %s\n", err.Error())
@@ -28,21 +30,22 @@ func main() {
 	}
 	defer producer.Close()
 
+	// Setup MySQL connection
 	db, err := getDbConnection()
 	if err != nil {
 		fmt.Printf("Error while getting MySQL connection: %s\n", err.Error())
 		return
 	}
-
 	defer db.Close()
 
 	s := handlers.Server{
 		Producer:  producer,
+		Consumer:  consumer,
 		SqlClient: handlers.SqlClient{DB: db},
 	}
 
 	// Consume kafka events asynchronously
-	go s.PollKafkaEvents(consumer)
+	go s.PollKafkaEvents()
 
 	mux := http.NewServeMux()
 	mux.HandleFunc("/api/v1/ingest", s.IngestHandler)
