@@ -25,7 +25,9 @@ There are four components in this project:
 ### Usage
 To run the Kafka and MySQL containers, spin them up with docker-compose:
 
-```$ docker-compose up -d```
+```
+docker-compose up -d
+```
 
 Don't forget to create the kafka topics:
 ```
@@ -39,7 +41,7 @@ To run the orchestrator and enumeration services, `cd` into the respective direc
 
 Once both services are running, start a subdomain by calling the orchestrator's ingest endpoint:
 ```
-curl -v -X POST localhost:9000/api/v1/ingest -H "Content-type: application/json" -d '{"Domain": "praetorian.com"}'
+curl -v -X POST "localhost:9000/api/v1/ingest" -H "Content-type: application/json" -d '{"Domain": "praetorian.com"}'
 ```
 
 ### API
