@@ -54,7 +54,7 @@ POST /api/v1/ingest
 GET  /api/v1/domain
   Returns all domains that have been scanned since startup
 
-GET  /api/v1/subdomain?page=<uint32>&offset=<uint32>
-  Returns a list of subdomains filtered by query parameters.
+GET  /api/v1/subdomain?page=<uint32>&limit=<uint32>
+  Returns up to <limit> starting on page <page>.
 
 ```
