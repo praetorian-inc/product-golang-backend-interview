@@ -1,6 +1,0 @@
-CREATE DATABASE IF NOT EXISTS scanner;
-
-CREATE USER 'orchestrator'@'%' IDENTIFIED BY 'password';
-GRANT ALL PRIVILEGES ON *.* TO 'orchestrator'@'%';
-
-FLUSH PRIVILEGES;

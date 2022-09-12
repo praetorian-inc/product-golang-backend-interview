@@ -83,24 +83,13 @@ func getDbConnection() (*sql.DB, error) {
 		return nil, err
 	}
 
-	_, err = db.Exec("DROP TABLE IF EXISTS `root_domain`;")
-	if err != nil {
-		fmt.Println(err.Error())
-		return nil, err
-	}
-	_, err = db.Exec("CREATE TABLE `root_domain` (`id` int(8) unsigned NOT NULL, root varchar(32) NOT NULL, status varchar(32), owner varchar(32), PRIMARY KEY (`id`));")
+	_, err = db.Exec("CREATE TABLE IF NOT EXISTS `root_domain` (`id` int(8) unsigned NOT NULL, root varchar(32) NOT NULL, status varchar(32), owner varchar(32), PRIMARY KEY (`id`));")
 	if err != nil {
 		fmt.Println(err.Error())
 		return nil, err
 	}
 
-	_, err = db.Exec("DROP TABLE IF EXISTS `subdomain`;")
-	if err != nil {
-		fmt.Println(err.Error())
-		return nil, err
-	}
-
-	_, err = db.Exec("CREATE TABLE `subdomain` (`id` int(8) unsigned NOT NULL, root varchar(32) NOT NULL, source varchar(256), PRIMARY KEY (`id`));")
+	_, err = db.Exec("CREATE TABLE IF NOT EXISTS `subdomain` (`id` int(8) unsigned NOT NULL, root varchar(32) NOT NULL, source varchar(256), PRIMARY KEY (`id`));")
 	if err != nil {
 		fmt.Println(err.Error())
 		return nil, err
