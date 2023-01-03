@@ -14,6 +14,7 @@ import (
 
 func main() {
 	port := flag.Int("listenPort", 9000, "Port on which to serve HTTP requests")
+	rand.Seed(time.Now().UnixNano())
 
 	// Setup Kafka consumer
 	consumer, err := setupKafkaConsumer()
