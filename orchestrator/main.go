@@ -5,9 +5,11 @@ import (
 	"flag"
 	"fmt"
 	"github.com/confluentinc/confluent-kafka-go/kafka"
+	"math/rand"
 	"net/http"
 	"orchestrator/handlers"
 	"strconv"
+	"time"
 
 	_ "github.com/go-sql-driver/mysql"
 )
