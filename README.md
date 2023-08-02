@@ -39,10 +39,32 @@ To run the orchestrator and enumeration services, `cd` into the respective direc
 ./run.sh
 ```
 
-Once both services are running, start a subdomain by calling the orchestrator's ingest endpoint:
+Once both services are running, start a subdomain scan by calling the orchestrator's ingest endpoint:
 ```
 curl -v -X POST "localhost:9000/api/v1/ingest" -H "Content-type: application/json" -d '{"Domain": "praetorian.com"}'
 ```
+
+If the call succeeds, the output from cURL should look like:
+
+```
+Note: Unnecessary use of -X or --request, POST is already inferred.
+*   Trying 127.0.0.1:9000...
+* Connected to localhost (127.0.0.1) port 9000 (#0)
+> POST /api/v1/ingest HTTP/1.1
+> Host: localhost:9000
+> User-Agent: curl/7.87.0
+> Accept: */*
+> Content-type: application/json
+> Content-Length: 28
+> 
+* Mark bundle as not supporting multiuse
+< HTTP/1.1 200 OK
+< Date: Wed, 02 Aug 2023 21:31:38 GMT
+< Content-Length: 0
+< 
+* Connection #0 to host localhost left intact
+```
+
 
 ### API
 
